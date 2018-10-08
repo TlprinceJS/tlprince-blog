@@ -3,6 +3,8 @@ const userSchema = require("../Schema/userSchema")
 const encrypt = require("../tool/encrypt")
 
 const User = db.model("users", userSchema)
+
+//注册判断
 const reg = async (ctx) => {
 
     //接收用户数据
@@ -52,4 +54,38 @@ const reg = async (ctx) => {
     })
 }
 
-module.exports = reg
+//登录判断
+const login =async (ctx) => {
+    const data = ctx.request.body
+    const username = data.username
+    const password = data.password
+
+    await new Promise ((resolve,reject) => {
+        //查找用户名是否存在
+        User.find({username}, (err, data) => {
+            if(err) return reject(err)
+            if(data.length === 0) return reject("用户名不存在")
+            //比较密码是否相同
+            if(data[0].password === encrypt(password)){
+                return resolve(data)
+            } else {
+                resolve("")
+            }
+        })
+    })
+    .then(async (data) => {
+        if(!data){
+            await ctx.render("isOk",{status: "密码不正确"})
+        }
+
+        await ctx.render("isOk",{status: "登录成功"})
+    })
+    .catch(async (err) => {
+        await ctx.render("isOk",{status: "登录失败"})
+    })
+}
+
+module.exports = {
+    reg,
+    login
+}

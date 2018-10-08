@@ -1,7 +1,7 @@
 const Router = require("koa-router")
 const router = new Router()
-const regf = require("../control/user")
-
+const { reg } = require("../control/user")
+const { login } = require("../control/user")
 
 router.get("/", async(ctx) => {
     await ctx.render("index")
@@ -13,10 +13,7 @@ router.get(/^\/user\/(?=reg|login)/, async(ctx) => {
     await ctx.render("register", {show})
 })
 
-// router.post("/user/login", async (ctx) => {
-//     const data = cxt.request.body
-//     const username = data.username
-// })
+router.post("/user/login", login)
 
-router.post("/user/reg", regf)
+router.post("/user/reg", reg)
 module.exports = router

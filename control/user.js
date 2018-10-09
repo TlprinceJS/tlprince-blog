@@ -55,7 +55,7 @@ const reg = async (ctx) => {
 }
 
 //登录判断
-const login =async (ctx) => {
+const login = async (ctx) => {
     const data = ctx.request.body
     const username = data.username
     const password = data.password
@@ -78,6 +78,27 @@ const login =async (ctx) => {
             await ctx.render("isOk",{status: "密码不正确"})
         }
 
+        ctx.cookies.set("username", username, {
+            domain: "localhost",
+            path: "/",
+            maxAge: 72e5,
+            httpOnly: true,
+            overwrite: false
+        })
+
+        ctx.cookies.set("userid", data[0]._id, {
+            domain: "localhost",
+            path: "/",
+            maxAge: 72e5,
+            httpOnly: true,
+            overwrite: false
+        })
+
+        ctx.session = {
+            username,
+            userid: data[0]._id
+        }
+
         await ctx.render("isOk",{status: "登录成功"})
     })
     .catch(async (err) => {
@@ -85,7 +106,32 @@ const login =async (ctx) => {
     })
 }
 
+const keepLog = async (ctx, next) => {
+    if(ctx.session.isNew) {
+        if(ctx.cookies.get("userid")) {
+            ctx.session = {
+                username: ctx.cookies.get("username"),
+                userid: ctx.cookies.get("userid")
+            }
+        }
+    }
+    
+    await next()
+}
+
+const logout = async (ctx) => {
+    //清除session
+    ctx.session = null
+    //清除cookies
+    ctx.cookies.set("userid", null, {maxAge: 0})
+    ctx.cookies.set("username", null, {maxAge: 0})
+    //重定向到根路径
+    ctx.redirect("/")
+}
+
 module.exports = {
     reg,
-    login
+    login,
+    keepLog,
+    logout
 }

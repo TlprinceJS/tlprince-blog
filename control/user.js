@@ -96,8 +96,10 @@ const login = async (ctx) => {
 
         ctx.session = {
             username,
-            userid: data[0]._id
+            userid: data[0]._id,
+            avatar: data[0].avatar
         }
+        console.log(ctx.session)
 
         await ctx.render("isOk",{status: "登录成功"})
     })
@@ -111,7 +113,7 @@ const keepLog = async (ctx, next) => {
         if(ctx.cookies.get("userid")) {
             ctx.session = {
                 username: ctx.cookies.get("username"),
-                userid: ctx.cookies.get("userid")
+                userid: ctx.cookies.get("userid"),
             }
         }
     }
